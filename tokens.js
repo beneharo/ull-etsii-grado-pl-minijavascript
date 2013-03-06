@@ -71,7 +71,7 @@ String.prototype.tokens = function () {
 
             n = +str;
             if (isFinite(n)) {
-                result.____(make('number', n));
+                result.push(make('number', n));
             } else {
                 make('number', str).error("Bad number");
             }
@@ -81,7 +81,7 @@ String.prototype.tokens = function () {
             _______________
             str = str.replace(/^____/,'');
             str = str.replace(/["']$/,'');
-            result.____(make('string', str));
+            result.push(make('string', str));
         // comment.
         } else if ((m = ONELINECOMMENT.bexec(this))  || 
                    (m = MULTIPLELINECOMMENT.bexec(this))) {
@@ -91,10 +91,10 @@ String.prototype.tokens = function () {
         } else if (m = TWOCHAROPERATORS.bexec(this)) {
             str = m[0];
             _______________
-            result.____(make('operator', str));
+            result.push(make('operator', str));
         // single-character operator
         } else if (m = ONECHAROPERATORS.bexec(this)){
-            result.____(make('operator', this.substr(i,1)));
+            result.push(make('operator', this.substr(i,1)));
             _______________
         } else {
           throw "Syntax error near '"+this.substr(i)+"'";
