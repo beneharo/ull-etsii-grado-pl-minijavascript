@@ -29,7 +29,7 @@ String.prototype.tokens = function () {
     var WHITES              = /\s+/g;
     var ID                  = /[a-zA-Z_]\w*/g;
     var NUM                 = /\d+(\.\d*)?([eE][+-]?\d+)?\b/g;
-    var STRING              = /('(\\.|[^'])*'|"(\\.|[^"])*"/g;
+    var STRING              = /('(\\.|[^'])*'|"(\\.|[^"])*")/g;
     var ONELINECOMMENT      = /\/\/.*/g;
     var MULTIPLELINECOMMENT = /\/[*](.|\n)*?[*]\//g;
     var TWOCHAROPERATORS    = /([+][+=]|-[-=]|=[=<>]|[<>][=<>]|&&|[|][|])/g;
@@ -46,28 +46,31 @@ String.prototype.tokens = function () {
     };
 
     // Begin tokenization. If the source string is empty, return nothing.
-    if (!this) return; 
+    if (!this) return;
+    
+    var cad = this;
 
     // Loop through this text
-    while (i < this.length) {
+     while (i < cad.length) {
         WHITES.lastIndex =  ID.lastIndex = NUM.lastIndex = STRING.lastIndex =
         ONELINECOMMENT.lastIndex = MULTIPLELINECOMMENT.lastIndex =
-        TWOCHAROPERATORS.lastIndex = ONECHAROPERATORS.lastIndex = _;
+        TWOCHAROPERATORS.lastIndex = ONECHAROPERATORS.lastIndex = i;
         from = i;
         // Ignore whitespace.
-        if (m = WHITES.bexec(this)) {
+        if (m = WHITES.bexec(cad)) {
             str = m[0];
-            _______________
+            cad = cad.substr(m.index + m[0].length);
+            
         // name.
-        } else if (m = ID.bexec(this)) {
+        } else if (m = ID.bexec(cad)) {
             str = m[0];
-            _______________
+            cad = cad.substr(m.index + m[0].length);
             result.push(make('name', str));
 
         // number.
-        } else if (m = NUM.bexec(this)) {
+        } else if (m = NUM.bexec(cad)) {
             str = m[0];
-            _______________
+            cad = cad.substr(m.index + m[0].length);
 
             n = +str;
             if (isFinite(n)) {
@@ -76,28 +79,28 @@ String.prototype.tokens = function () {
                 make('number', str).error("Bad number");
             }
         // string
-        } else if (m = STRING.bexec(this)) {
+        } else if (m = STRING.bexec(cad)) {
             str = m[0];
-            _______________
-            str = str.replace(/^____/,'');
+            cad = cad.substr(m.index + m[0].length);
+            str = str.replace(/^["']/,'');
             str = str.replace(/["']$/,'');
             result.push(make('string', str));
         // comment.
-        } else if ((m = ONELINECOMMENT.bexec(this))  || 
-                   (m = MULTIPLELINECOMMENT.bexec(this))) {
+        } else if ((m = ONELINECOMMENT.bexec(cad))  || 
+                   (m = MULTIPLELINECOMMENT.bexec(cad))) {
             str = m[0];
-            _______________
+            cad = cad.substr(m.index + m[0].length);
         // two char operator
-        } else if (m = TWOCHAROPERATORS.bexec(this)) {
+        } else if (m = TWOCHAROPERATORS.bexec(cad)) {
             str = m[0];
-            _______________
+            cad = cad.substr(m.index + m[0].length);
             result.push(make('operator', str));
         // single-character operator
-        } else if (m = ONECHAROPERATORS.bexec(this)){
-            result.push(make('operator', this.substr(i,1)));
-            _______________
+        } else if (m = ONECHAROPERATORS.bexec(cad)){
+            result.push(make('operator', cad.substr(i,1)));
+            cad = cad.substr(m.index + m[0].length);
         } else {
-          throw "Syntax error near '"+this.substr(i)+"'";
+          throw "Syntax error near '"+cad.substr(i)+"'";
         }
     }
     return result;
